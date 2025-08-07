@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom CSS untuk Garis Bagan Organisasi */
+.org-line {
+  position: relative;
+}
+
+/* Garis vertikal ke atas dari setiap kotak */
+.org-line::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 2px; /* Lebar garis */
+  height: 1.5rem; /* Panjang garis ke atas (24px) */
+  background-color: #9ca3af; /* Warna abu-abu */
+}
+
+/* Garis horizontal yang menghubungkan semuanya */
+.org-line::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px; /* Lebar garis */
+  background-color: #9ca3af; /* Warna abu-abu */
+}
+
+/* Khusus untuk item pertama di baris, agar garis tidak mulai dari kiri */
+.org-line:first-child::after {
+  left: 50%;
+}
+
+/* Khusus untuk item terakhir di baris, agar garis tidak sampai ke kanan */
+.org-line:last-child::after {
+  right: 50%;
+}
