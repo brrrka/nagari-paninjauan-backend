@@ -7,7 +7,7 @@ import { beritaData } from '../Informasi Publik/beritaData.jsx'; // <-- Impor da
 // Data untuk video podcast
 const podcastData = [
   { id: 1, title: 'Episode 1: Sejarah Nagari Paninjauan', description: 'Mengetahui bagaimana sejarah dan asal usul dari Nagari Paninjauan ', thumbnail: '/images/episode1.png', videoSrc: 'https://www.youtube.com/embed/Wj3g79vg2FY?si=hnQ0Ev0GpllDUXE1' },
-  { id: 2, title: 'Episode 2: Kearifan Lokal Pertanian', description: 'Melihat lebih dekat sistem pertanian dan perikanan.', thumbnail: '/images/podcast2.jpg', videoSrc: 'https://www.youtube.com/embed/Wj3g79vg2FY?si=hnQ0Ev0GpllDUXE1' },
+  { id: 2, title: 'Episode 2: Sistem Budaya Nagari Paninjauan', description: 'Membahas bagaimana atau seperti apa Sistem Budaya yang ada di Nagari Paninjauan', thumbnail: '/images/episode2.jpg', videoSrc: 'https://www.youtube.com/embed/9vvy-PGNKHc?si=OxIicKUWTnM7hbce'},
   { id: 3, title: 'Episode 3: Geliat Kesenian Daerah', description: 'Mengenal lebih dalam seni Randai dan musik Tambua.', thumbnail: '/images/podcast3.jpg', videoSrc: '/videos/episode3.mp4' },
   { id: 4, title: 'Episode 4: Bincang Wali Nagari', description: 'Wawancara eksklusif mengenai visi dan misi nagari.', thumbnail: '/images/podcast4.jpg', videoSrc: '/videos/episode4.mp4' }
 ];

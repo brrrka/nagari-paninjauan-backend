@@ -37,8 +37,8 @@ import LembagaLainnyaPage from './pages/Lembaga/LembagaLainnyaPage';
 
 // Impor halaman Informasi Publik
 import PengumumanInformasiPage from './pages/Informasi Publik/PengumumanInformasiPage';
-import GaleriKKNPage from './pages/Informasi Publik/GaleriKKNPage';
 import BeritaDetailPage from './pages/Informasi Publik/BeritaDetailPage';
+import GaleriKKNPage from './pages/Informasi Publik/GaleriKKNPage';
 
 // Impor halaman Kontak
 import ContactPage from './pages/Kontak/ContactPage';

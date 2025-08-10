@@ -51,8 +51,7 @@ const menuItems = [
       name: 'Informasi Publik',
       subItems: [
         { name: 'Pengumuman dan Informasi', href: '/info/pengumuman' },
-        { name: 'Agenda', href: '/info/agenda' },
-        { name: 'KKN Paninjauan II Unand 2025', href: '/info/galeri' },
+        { name: 'KKN Paninjauan II Unand 2025', href: '/galeri-kkn' },
       ]
     },
     { name: 'Kontak', href: '/kontak' },
