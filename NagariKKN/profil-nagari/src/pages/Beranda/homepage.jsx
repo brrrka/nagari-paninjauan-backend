@@ -1,77 +1,108 @@
-// src/pages/HomePage.jsx
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { beritaData } from '../Informasi Publik/beritaData.jsx'; // <-- Impor data berita
+import { beritaService } from '../../services/beritaService';
 
 // Data untuk video podcast
 const podcastData = [
   { id: 1, title: 'Episode 1: Sejarah Nagari Paninjauan', description: 'Mengetahui bagaimana sejarah dan asal usul dari Nagari Paninjauan ', thumbnail: '/images/episode1.png', videoSrc: 'https://www.youtube.com/embed/Wj3g79vg2FY?si=hnQ0Ev0GpllDUXE1' },
-  { id: 2, title: 'Episode 2: Sistem Budaya Nagari Paninjauan', description: 'Membahas bagaimana atau seperti apa Sistem Budaya yang ada di Nagari Paninjauan', thumbnail: '/images/episode2.jpg', videoSrc: 'https://www.youtube.com/embed/9vvy-PGNKHc?si=OxIicKUWTnM7hbce'},
+  { id: 2, title: 'Episode 2: Sistem Budaya Nagari Paninjauan', description: 'Membahas bagaimana atau seperti apa Sistem Budaya yang ada di Nagari Paninjauan', thumbnail: '/images/episode2.jpg', videoSrc: 'https://www.youtube.com/embed/9vvy-PGNKHc?si=OxIicKUWTnM7hbce' },
   { id: 3, title: 'Episode 3: Geliat Kesenian Daerah', description: 'Mengenal lebih dalam seni Randai dan musik Tambua.', thumbnail: '/images/podcast3.jpg', videoSrc: '/videos/episode3.mp4' },
   { id: 4, title: 'Episode 4: Bincang Wali Nagari', description: 'Wawancara eksklusif mengenai visi dan misi nagari.', thumbnail: '/images/podcast4.jpg', videoSrc: '/videos/episode4.mp4' }
 ];
 
 // Komponen Kartu Menu Cepat
 const MenuCard = ({ to, title, iconSrc, delay }) => (
-    <motion.div 
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7, delay }}
-        style={{ perspective: 1000 }}
-    >
-        <Link to={to} className="block p-8 bg-white/50 backdrop-blur-sm border border-gray-200/50 rounded-2xl shadow-xl  hover:shadow-2xl transition-all duration-300 h-full">
-            <motion.div 
-                className="text-center"
-                whileHover={{ rotateY: 15, rotateX: -10 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            >
-                <div className="inline-block p-4 bg-gradient-to-tr from-green-100 to-yellow-100 rounded-full mb-4">
-                    <img src={iconSrc} alt={title} className="w-12 h-12" />
-                </div>
-                <h3 className="text-lg font-semibold text-nagari-brown">
-                    {title}
-                </h3>
-            </motion.div>
-        </Link>
-    </motion.div>
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.7, delay }}
+    style={{ perspective: 1000 }}
+  >
+    <Link to={to} className="block p-8 bg-white/50 backdrop-blur-sm border border-gray-200/50 rounded-2xl shadow-xl  hover:shadow-2xl transition-all duration-300 h-full">
+      <motion.div
+        className="text-center"
+        whileHover={{ rotateY: 15, rotateX: -10 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      >
+        <div className="inline-block p-4 bg-gradient-to-tr from-green-100 to-yellow-100 rounded-full mb-4">
+          <img src={iconSrc} alt={title} className="w-12 h-12" />
+        </div>
+        <h3 className="text-lg font-semibold text-nagari-brown">
+          {title}
+        </h3>
+      </motion.div>
+    </Link>
+  </motion.div>
 );
 
 function HomePage() {
   const [playingVideo, setPlayingVideo] = useState(null);
+  const [beritaTerbaru, setBeritaTerbaru] = useState([]);
+  const [loadingBerita, setLoadingBerita] = useState(true);
+
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({
-      target: heroRef,
-      offset: ["start start", "end start"],
+    target: heroRef,
+    offset: ["start start", "end start"],
   });
   const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const textY = useTransform(scrollYProgress, [0, 1], ["0%", "200%"]);
 
-  // Ambil 3 berita terbaru untuk ditampilkan di beranda
-  const beritaTerbaru = beritaData.slice(0, 3);
+  // Fetch 3 berita terbaru dari API
+  useEffect(() => {
+    fetchBeritaTerbaru();
+  }, []);
+
+  const fetchBeritaTerbaru = async () => {
+    try {
+      const data = await beritaService.getLatestThree();
+      setBeritaTerbaru(data);
+    } catch (error) {
+      console.error('Error fetching latest berita:', error);
+      // Fallback to empty array if API fails
+      setBeritaTerbaru([]);
+    } finally {
+      setLoadingBerita(false);
+    }
+  };
+
+  // Format date untuk display
+  const formatDate = (dateStr) => {
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch {
+      return dateStr;
+    }
+  };
 
   return (
     <main className="bg-gray-100">
       {/* Hero Section */}
       <section ref={heroRef} className="relative h-screen text-white overflow-hidden">
-        <motion.div 
-            className="absolute inset-0 bg-cover bg-center" 
-            style={{ backgroundImage: "url('images/fotoalam.jpg')", y: backgroundY }}
+        <motion.div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('images/fotoalam.jpg')", y: backgroundY }}
         />
         <div className="absolute inset-0 bg-black/60"></div>
-        <motion.div 
-            style={{ y: textY }}
-            className="relative z-10 h-full flex flex-col justify-center items-start container mx-auto px-6 max-w-7xl"
+        <motion.div
+          style={{ y: textY }}
+          className="relative z-10 h-full flex flex-col justify-center items-start container mx-auto px-6 max-w-7xl"
         >
           <div className="w-full md:w-2/3 lg:w-1/2">
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
               className="text-5xl md:text-7xl font-black text-white drop-shadow-lg leading-tight whitespace-nowrap"
             >
               Nagari Paninjauan
             </motion.h1>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}
               className="mt-4 text-lg text-gray-200 max-w-xl drop-shadow-md text-justify"
             >
@@ -97,41 +128,41 @@ function HomePage() {
       <section className="py-20 bg-gray-100">
         <div className="container mx-auto px-6 max-w-7xl">
           <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-nagari-brown">Unggulan Nagari</h2>
+            <h2 className="text-4xl font-bold text-nagari-brown">Unggulan Nagari</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Link to="/potensi/pariwisata" className="relative rounded-xl overflow-hidden shadow-lg group block">
-                  <img src="images/danau.jpg" alt="Pariwisata Alam" className="w-full h-96 object-cover transform group-hover:scale-110 transition-transform duration-500" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-                  <div className="absolute bottom-0 p-6">
-                      <h3 className="text-2xl font-bold text-white">Pariwisata Alam</h3>
-                      <p className="mt-1 text-gray-200">Keindahan Danau Maninjau dan udara sejuk.</p>
-                  </div>
-              </Link>
-              <Link to="/potensi/penghasilan" className="relative rounded-xl overflow-hidden shadow-lg group block">
-                  <img src="images/pertanian.jpg" alt="Pertanian & Perikanan" className="w-full h-96 object-cover transform group-hover:scale-110 transition-transform duration-500" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-                  <div className="absolute bottom-0 p-6">
-                      <h3 className="text-2xl font-bold text-white">Pertanian & Perikanan</h3>
-                      <p className="mt-1 text-gray-200">Hasil sawah, ikan nila, dan Madu Galo-galo.</p>
-                  </div>
-              </Link>
-              <Link to="/kesenian-daerah" className="relative rounded-xl overflow-hidden shadow-lg group block">
-                  <img src="images/tambua.jpg" alt="Kesenian Daerah" className="w-full h-96 object-cover transform group-hover:scale-110 transition-transform duration-500" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-                  <div className="absolute bottom-0 p-6">
-                      <h3 className="text-2xl font-bold text-white">Kesenian Daerah</h3>
-                      <p className="mt-1 text-gray-200">Seni pertunjukan Randai dan musik Tambua.</p>
-                  </div>
-              </Link>
+            <Link to="/potensi/pariwisata" className="relative rounded-xl overflow-hidden shadow-lg group block">
+              <img src="images/danau.jpg" alt="Pariwisata Alam" className="w-full h-96 object-cover transform group-hover:scale-110 transition-transform duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+              <div className="absolute bottom-0 p-6">
+                <h3 className="text-2xl font-bold text-white">Pariwisata Alam</h3>
+                <p className="mt-1 text-gray-200">Keindahan Danau Maninjau dan udara sejuk.</p>
+              </div>
+            </Link>
+            <Link to="/potensi/penghasilan" className="relative rounded-xl overflow-hidden shadow-lg group block">
+              <img src="images/pertanian.jpg" alt="Pertanian & Perikanan" className="w-full h-96 object-cover transform group-hover:scale-110 transition-transform duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+              <div className="absolute bottom-0 p-6">
+                <h3 className="text-2xl font-bold text-white">Pertanian & Perikanan</h3>
+                <p className="mt-1 text-gray-200">Hasil sawah, ikan nila, dan Madu Galo-galo.</p>
+              </div>
+            </Link>
+            <Link to="/kesenian-daerah" className="relative rounded-xl overflow-hidden shadow-lg group block">
+              <img src="images/tambua.jpg" alt="Kesenian Daerah" className="w-full h-96 object-cover transform group-hover:scale-110 transition-transform duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+              <div className="absolute bottom-0 p-6">
+                <h3 className="text-2xl font-bold text-white">Kesenian Daerah</h3>
+                <p className="mt-1 text-gray-200">Seni pertunjukan Randai dan musik Tambua.</p>
+              </div>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* --- SECTION BERITA TERKINI (BAGIAN BARU) --- */}
+      {/* Section Berita Terkini */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6 max-w-7xl">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -141,30 +172,60 @@ function HomePage() {
             <h2 className="text-4xl font-bold text-nagari-brown">Berita Terkini</h2>
             <p className="text-gray-600 mt-2 text-lg">Ikuti perkembangan dan kegiatan terbaru di Nagari Paninjauan.</p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {beritaTerbaru.map((berita, index) => (
-              <motion.div 
-                key={berita.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.7, delay: 0.2 + index * 0.1 }}
-              >
-                <Link to={`/berita/${berita.id}`} className="block bg-white rounded-xl shadow-lg overflow-hidden group h-full">
-                  <div className="overflow-hidden h-56">
-                    <img src={berita.imageUrl} alt={berita.title} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" />
-                  </div>
-                  <div className="p-6 flex flex-col">
-                    <div className="flex-grow">
-                      <span className="text-xs font-semibold text-white bg-nagari-green px-2 py-1 rounded-full">{berita.category}</span>
-                      <h3 className="text-xl font-bold text-nagari-brown mt-3 group-hover:text-nagari-green transition-colors duration-300">{berita.title}</h3>
+
+          {loadingBerita ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="text-xl text-gray-500">Loading berita...</div>
+            </div>
+          ) : beritaTerbaru.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {beritaTerbaru.map((berita, index) => (
+                <motion.div
+                  key={berita.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.7, delay: 0.2 + index * 0.1 }}
+                >
+                  <Link to={`/berita/${berita.id}`} className="block bg-white rounded-xl shadow-lg overflow-hidden group h-full">
+                    <div className="overflow-hidden h-56">
+                      <img
+                        src={berita.imageUrl || '/images/placeholder.jpg'}
+                        alt={berita.title}
+                        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {
+                          e.target.src = '/images/placeholder.jpg';
+                        }}
+                      />
                     </div>
-                    <p className="text-gray-400 text-sm mt-4">{berita.date}</p>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+                    <div className="p-6 flex flex-col">
+                      <div className="flex-grow">
+                        <span className="text-xs font-semibold text-white bg-nagari-green px-2 py-1 rounded-full">{berita.category}</span>
+                        <h3 className="text-xl font-bold text-nagari-brown mt-3 group-hover:text-nagari-green transition-colors duration-300">{berita.title}</h3>
+                      </div>
+                      <p className="text-gray-400 text-sm mt-4">{formatDate(berita.date)}</p>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">Belum ada berita tersedia.</p>
+            </div>
+          )}
+
+          {/* Link to all news */}
+          {beritaTerbaru.length > 0 && (
+            <div className="text-center mt-12">
+              <Link
+                to="/info/pengumuman"
+                className="inline-block bg-nagari-green text-white px-6 py-3 rounded-lg hover:bg-opacity-90 transition-colors"
+              >
+                Lihat Semua Berita
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
@@ -198,7 +259,7 @@ function HomePage() {
 
       {/* Modal Pemutar Video */}
       {playingVideo && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => setPlayingVideo(null)}
         >
@@ -206,11 +267,11 @@ function HomePage() {
             <button onClick={() => setPlayingVideo(null)} className="absolute -top-10 right-0 text-white text-4xl font-bold hover:text-gray-300">×</button>
             <div className="aspect-w-16 aspect-h-9 bg-black rounded-lg overflow-hidden shadow-2xl">
               {playingVideo.includes('youtube') ? (
-                <iframe 
+                <iframe
                   src={`${playingVideo}?autoplay=1`}
-                  title="YouTube video player" 
-                  frameBorder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   className="w-full h-full"
                 ></iframe>
